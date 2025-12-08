@@ -1,15 +1,13 @@
 Agent
 =====
-
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JBSommeling/agent/ci.yml?style=for-the-badge)
-[![Packagist Version](https://img.shields.io/packagist/v/JBSommeling/agent?style=for-the-badge)
-](https://packagist.org/packages/JBSommeling/agent)
-[![Packagist Downloads](https://img.shields.io/packagist/dt/JBSommeling/agent?style=for-the-badge)](https://packagist.org/packages/JBSommeling/agent)
-
 A PHP desktop/mobile user agent parser with support for Laravel, based on [Mobile Detect](https://github.com/serbanghita/Mobile-Detect) with desktop support and additional functionality.
 
 > [!note]
 > This is a modified version of [jenssegers/agent](https://github.com/jenssegers/agent) to support PHP 8.0 up and MobileDetect 4.x.
+
+> [!note]
+> This is a modified version of [asika32764/agent](https://github.com/asika32764/agent) to support PHP 8.0 up and MobileDetect 4.x. with a few fixes for personal projects. All kudo's to Asika32764 for the updated work. I'd recommend using his package instead if you want a barebones upgrade of the jenssegers/agent package.
+
 
 > [!important]
 > This fork is for B/C purpose.

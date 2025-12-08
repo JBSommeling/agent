@@ -1,5 +1,5 @@
 {
-    "name": "asika/agent",
+    "name": "jbsommeling/agent",
     "description": "Desktop/mobile user agent parser with support for Laravel, based on Mobiledetect",
     "keywords": ["laravel", "useragent", "agent", "user agent", "browser", "platform", "mobile", "desktop"],
     "homepage": "https://github.com/asika32764/agent",
@@ -12,6 +12,10 @@
         {
             "name": "Simon Asika",
             "homepage": "https://github.com/asika32764"
+        },
+        {
+          "name": "Jesse Sommeling",
+          "homepage": "https://sommeling.dev"
         }
     ],
     "require": {

@@ -25,7 +25,7 @@ Installation
 Install using composer:
 
 ```bash
-composer require asika/agent
+composer require jbsommeling/agent
 ```
 
 Laravel (optional)

@@ -1,6 +1,6 @@
 <?php
 
-namespace Asika\Agent\Facades;
+namespace JBSommeling\Agent\Facades;
 
 use Illuminate\Support\Facades\Facade;
 

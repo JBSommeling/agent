@@ -6,7 +6,7 @@
  * @license    MIT
  */
 
-namespace Asika\SimpleConsole;
+namespace JBSommeling\SimpleConsole;
 
 /**
  * The Console class.

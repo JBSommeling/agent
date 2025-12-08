@@ -2,7 +2,7 @@
     "name": "jbsommeling/agent",
     "description": "Desktop/mobile user agent parser with support for Laravel, based on Mobiledetect",
     "keywords": ["laravel", "useragent", "agent", "user agent", "browser", "platform", "mobile", "desktop"],
-    "homepage": "https://github.com/asika32764/agent",
+    "homepage": "https://github.com/JBSommeling",
     "license" : "MIT",
     "authors": [
         {
@@ -29,7 +29,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Asika\\Agent\\": "src/"
+            "JBSommeling\\Agent\\": "src/"
         }
     },
     "extra": {
@@ -38,10 +38,10 @@
         },
         "laravel": {
             "providers": [
-                "Asika\\Agent\\AgentServiceProvider"
+                "JBSommeling\\Agent\\AgentServiceProvider"
             ],
             "aliases": {
-                "Agent": "Asika\\Agent\\Facades\\Agent"
+                "Agent": "JBSommeling\\Agent\\Facades\\Agent"
             }
         }
     },

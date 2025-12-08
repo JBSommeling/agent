@@ -8,7 +8,7 @@
 
 // phpcs:disable
 
-use Asika\SimpleConsole\Console;
+use JBSommeling\SimpleConsole\Console;
 
 include_once __DIR__ . '/Console.php';
 

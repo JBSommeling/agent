@@ -1,6 +1,6 @@
 <?php
 
-namespace Asika\Agent;
+namespace JBSommeling\Agent;
 
 use Illuminate\Support\ServiceProvider;
 

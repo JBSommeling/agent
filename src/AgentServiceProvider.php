@@ -2,23 +2,17 @@
 
 namespace JBSommeling\Agent;
 
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
-class AgentServiceProvider extends ServiceProvider
+class AgentServiceProvider extends ServiceProvider implements DeferrableProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
-
     /**
      * Register the service provider.
      */
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton('agent', function ($app) {
+        $this->app->scoped('agent', function ($app) {
             return new Agent($app['request']->server());
         });
 
@@ -30,7 +24,7 @@ class AgentServiceProvider extends ServiceProvider
      *
      * @return array
      */
-    public function provides()
+    public function provides(): array
     {
         return ['agent', Agent::class];
     }

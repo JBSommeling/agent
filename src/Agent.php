@@ -11,14 +11,9 @@ use Psr\SimpleCache\CacheInterface;
 class Agent extends MobileDetect
 {
     /**
-     * A type for the version() method indicating a string return value.
+     * Maximum number of Accept-Language entries that are parsed.
      */
-    protected const VERSION_TYPE_STRING = 'text';
-
-    /**
-     * A type for the version() method indicating a float return value.
-     */
-    protected const VERSION_TYPE_FLOAT = 'float';
+    protected const MAX_ACCEPT_LANGUAGE_ENTRIES = 20;
 
     /**
      * List of desktop devices.
@@ -195,12 +190,26 @@ class Agent extends MobileDetect
         }
 
         $languages = [];
+        $pieces = array_slice(explode(',', $acceptLanguage), 0, static::MAX_ACCEPT_LANGUAGE_ENTRIES);
 
         // Parse accept language string.
-        foreach (explode(',', $acceptLanguage) as $piece) {
-            $parts = explode(';', $piece);
-            $language = strtolower($parts[0]);
-            $priority = empty($parts[1]) ? 1. : (float) str_replace('q=', '', $parts[1]);
+        foreach ($pieces as $piece) {
+            $parts = explode(';', $piece, 2);
+            $language = strtolower(trim($parts[0]));
+
+            if (!preg_match('/^(?:\*|[a-z]{1,8}(?:[-_][a-z0-9]{1,8})*)$/', $language)) {
+                continue;
+            }
+
+            $priority = 1.;
+
+            if (isset($parts[1])) {
+                if (!preg_match('/^\s*q\s*=\s*([01](?:\.\d{0,3})?)\s*$/i', $parts[1], $qualityMatch)) {
+                    continue;
+                }
+
+                $priority = (float) $qualityMatch[1];
+            }
 
             $languages[$language] = $priority;
         }
@@ -247,7 +256,11 @@ class Agent extends MobileDetect
 
     public function match(string $regex, ?string $userAgent = null): bool
     {
-        $userAgent ??= $this->userAgent;
+        $userAgent = $this->normalizeUserAgent($userAgent);
+
+        if ($userAgent === null) {
+            return false;
+        }
 
         return parent::match($regex, $userAgent);
     }
@@ -365,7 +378,7 @@ class Agent extends MobileDetect
      */
     public function robot(?string $userAgent = null): bool|string
     {
-        if ($this->getCrawlerDetect()->isCrawler($userAgent ?: $this->userAgent)) {
+        if ($this->getCrawlerDetect()->isCrawler($this->normalizeUserAgent($userAgent) ?: $this->userAgent)) {
             return ucfirst($this->getCrawlerDetect()->getMatches());
         }
 
@@ -381,7 +394,7 @@ class Agent extends MobileDetect
      */
     public function isRobot(?string $userAgent = null): bool
     {
-        return $this->getCrawlerDetect()->isCrawler($userAgent ?: $this->userAgent);
+        return $this->getCrawlerDetect()->isCrawler($this->normalizeUserAgent($userAgent) ?: $this->userAgent);
     }
 
     /**
@@ -416,7 +429,7 @@ class Agent extends MobileDetect
 
     public function version(string $propertyName, string $type = self::VERSION_TYPE_STRING): float|bool|string
     {
-        if (empty($propertyName)) {
+        if (empty($propertyName) || empty($this->userAgent)) {
             return false;
         }
 
@@ -433,11 +446,15 @@ class Agent extends MobileDetect
             // Make sure we always deal with an array (string is converted).
             $properties[$propertyName] = (array) $properties[$propertyName];
 
-            foreach ($properties[$propertyName] as $propertyMatchString) {
-                if (is_array($propertyMatchString)) {
-                    $propertyMatchString = implode("|", $propertyMatchString);
-                }
+            $propertyMatchStrings = [];
 
+            foreach ($properties[$propertyName] as $propertyMatchString) {
+                foreach ((array) $propertyMatchString as $innerMatchString) {
+                    $propertyMatchStrings[] = $innerMatchString;
+                }
+            }
+
+            foreach ($propertyMatchStrings as $propertyMatchString) {
                 $propertyPattern = str_replace('[VER]', self::VERSION_REGEX, $propertyMatchString);
 
                 // Identify and extract the version.
@@ -480,26 +497,45 @@ class Agent extends MobileDetect
         return $merged;
     }
 
+    /**
+     * Apply the same length cap as setUserAgent(), which the parent keeps private.
+     */
+    protected function normalizeUserAgent(?string $userAgent): ?string
+    {
+        if ($userAgent === null) {
+            return $this->userAgent;
+        }
+
+        return substr(trim($userAgent), 0, $this->config['maximumUserAgentLength']);
+    }
+
     protected function overrideUAAndHeaders(
         ?string $userAgent,
         ?array $temporaryHttpHeaders,
         \Closure $callback
     ) {
-        $ua = $this->userAgent;
+        $previousUserAgent = $this->userAgent;
+        $previousTemporaryHttpHeaders = $this->temporaryHttpHeaders;
+        $previousHttpHeaders = $this->httpHeaders;
 
-        if ($userAgent !== null) {
-            $this->userAgent = $userAgent;
+        try {
+            if ($userAgent !== null) {
+                $this->userAgent = $this->normalizeUserAgent($userAgent);
+            }
+
+            $this->temporaryHttpHeaders = $temporaryHttpHeaders;
+
+            // The parent reads $this->httpHeaders directly, so the override must be swapped in.
+            if ($temporaryHttpHeaders !== null) {
+                $this->httpHeaders = $temporaryHttpHeaders;
+            }
+
+            return $callback($this->userAgent, $this->temporaryHttpHeaders ?? $this->httpHeaders);
+        } finally {
+            $this->temporaryHttpHeaders = $previousTemporaryHttpHeaders;
+            $this->userAgent = $previousUserAgent;
+            $this->httpHeaders = $previousHttpHeaders;
         }
-
-        $this->temporaryHttpHeaders = $temporaryHttpHeaders;
-
-        $result = $callback($this->userAgent, $this->temporaryHttpHeaders ?? $this->httpHeaders);
-
-        $this->temporaryHttpHeaders = null;
-
-        $this->userAgent = $ua;
-
-        return $result;
     }
 
     public function getHttpHeader(string $header): ?string

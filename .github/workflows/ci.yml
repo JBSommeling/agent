@@ -4,29 +4,52 @@ on: [push, pull_request]
 
 jobs:
   build:
+    name: PHP ${{ matrix.php-versions }} / Laravel ${{ matrix.laravel }} ${{ matrix.stability }}
     strategy:
+      fail-fast: false
       matrix:
-        php-versions: [ '8.0', '8.1', '8.2', '8.3', '8.4' ]
+        include:
+          - { laravel: '9', php-versions: '8.0' }
+          - { laravel: '9', php-versions: '8.1' }
+          - { laravel: '9', php-versions: '8.2' }
+          - { laravel: '10', php-versions: '8.1' }
+          - { laravel: '10', php-versions: '8.2' }
+          - { laravel: '10', php-versions: '8.3' }
+          - { laravel: '11', php-versions: '8.2' }
+          - { laravel: '11', php-versions: '8.3' }
+          - { laravel: '11', php-versions: '8.4' }
+          - { laravel: '12', php-versions: '8.2' }
+          - { laravel: '12', php-versions: '8.3' }
+          - { laravel: '12', php-versions: '8.4' }
+          - { laravel: '12', php-versions: '8.5' }
+          - { laravel: '13', php-versions: '8.3' }
+          - { laravel: '13', php-versions: '8.4' }
+          - { laravel: '13', php-versions: '8.5' }
+          - { laravel: '9', php-versions: '8.0', stability: 'prefer-lowest' }
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       # PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-#          extensions: mbstring
       - name: Get composer cache directory
         id: composercache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
       - name: Cache composer dependencies
         uses: actions/cache@v4
         with:
           path: ${{ steps.composercache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: ${{ runner.os }}-composer-
+          key: ${{ runner.os }}-composer-${{ matrix.laravel }}-${{ matrix.stability }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-${{ matrix.laravel }}-
+      - name: Pin Laravel version
+        run: composer require --dev "illuminate/support:^${{ matrix.laravel }}.0" --no-update
       - name: Install dependencies
-        run: composer update --prefer-dist --prefer-stable   --no-progress --no-suggest
+        # EOL Laravel versions carry advisories; only this test environment installs them.
+        env:
+          COMPOSER_NO_SECURITY_BLOCKING: ${{ (matrix.laravel == '9' || matrix.laravel == '10' || matrix.laravel == '11') && '1' || '0' }}
+        run: composer update --prefer-dist --prefer-stable --no-progress ${{ matrix.stability == 'prefer-lowest' && '--prefer-lowest' || '' }}
 
       - name: Run test suite
-        run: php vendor/bin/phpunit --configuration phpunit.ci.xml
+        run: php vendor/bin/phpunit --configuration ${{ matrix.laravel == '9' && 'phpunit9.ci.xml' || 'phpunit.ci.xml' }}

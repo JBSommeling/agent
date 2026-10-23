@@ -1,7 +1,10 @@
 <?php
 
+namespace JBSommeling\Agent\Tests;
+
 use JBSommeling\Agent\Agent;
 use PHPUnit\Framework\TestCase;
+use Detection\Exception\MobileDetectException;
 
 class AgentTest extends TestCase
 {
@@ -279,5 +282,102 @@ class AgentTest extends TestCase
             $this->assertFalse($agent->isPhone(), $ua);
             $this->assertFalse($agent->isRobot(), $ua);
         }
+    }
+
+    private const CHROME_WINDOWS_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36';
+
+    public function testVersionConstantsArePubliclyAccessible()
+    {
+        $this->assertSame('float', Agent::VERSION_TYPE_FLOAT);
+        $this->assertSame('text', Agent::VERSION_TYPE_STRING);
+    }
+
+    public function testHugeUserAgentIsHandledQuickly()
+    {
+        $agent = new Agent();
+        $hugeUserAgent = str_repeat('a', 1024 * 1024);
+
+        $startTime = microtime(true);
+        $agent->isDesktop($hugeUserAgent);
+        $agent->browser($hugeUserAgent);
+        $agent->isRobot($hugeUserAgent);
+        $elapsedSeconds = microtime(true) - $startTime;
+
+        $this->assertLessThan(2, $elapsedSeconds);
+    }
+
+    public function testPaddedUserAgentStillDetectsBrowser()
+    {
+        $agent = new Agent();
+        $paddedUserAgent = self::CHROME_WINDOWS_USER_AGENT . ' ' . str_repeat('junk ', 400);
+
+        $this->assertSame('Chrome', $agent->browser($paddedUserAgent));
+    }
+
+    public function testStateIsRestoredAfterException()
+    {
+        $agent = new Agent([], null, null, ['autoInitOfHttpHeaders' => false]);
+
+        try {
+            $agent->isMobile();
+            $this->fail('Expected a MobileDetectException.');
+        } catch (MobileDetectException $exception) {
+            $this->assertNull($agent->getUserAgent());
+        }
+
+        $this->assertTrue($agent->isDesktop(self::CHROME_WINDOWS_USER_AGENT));
+        $this->assertNull($agent->getUserAgent());
+    }
+
+    public function testHttpHeadersOverrideIsHonoured()
+    {
+        $agent = new Agent();
+        $agent->setUserAgent(self::CHROME_WINDOWS_USER_AGENT);
+
+        $this->assertFalse($agent->isMobile());
+        $this->assertTrue($agent->isMobile(null, ['HTTP_X_WAP_PROFILE' => 'http://example.com/profile.xml']));
+        $this->assertFalse($agent->isMobile());
+    }
+
+    public function testLanguagesIgnoreInvalidEntries()
+    {
+        $agent = new Agent();
+
+        $this->assertSame(['en-us', 'nl'], $agent->languages('en-US, nl;q=0.8, <script>;q=9'));
+    }
+
+    public function testLanguagesAreCappedAtTwentyEntries()
+    {
+        $agent = new Agent();
+        $acceptLanguage = implode(',', array_map(fn(int $number) => 'a' . chr(97 + $number % 26) . chr(97 + intdiv($number, 26)), range(0, 49)));
+
+        $this->assertCount(20, $agent->languages($acceptLanguage));
+    }
+
+    public function testLanguagesSkipInvalidQuality()
+    {
+        $agent = new Agent();
+
+        $this->assertSame(['nl'], $agent->languages('en;q=abc, nl;q=0.5'));
+    }
+
+    public function testVersionOfNestedPropertyPatterns()
+    {
+        $agent = new Agent();
+        $internetExplorerUserAgent = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
+        $edgeUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.29 Safari/537.36 Edg/79.0.309.18';
+
+        $agent->setUserAgent($internetExplorerUserAgent);
+        $this->assertSame('11.0', $agent->version('IE'));
+
+        $agent->setUserAgent($edgeUserAgent);
+        $this->assertSame('79.0.309.18', $agent->version('Edge'));
+    }
+
+    public function testVersionWithoutUserAgentReturnsFalse()
+    {
+        $agent = new Agent();
+
+        $this->assertFalse($agent->version('Chrome'));
     }
 }

@@ -1,12 +1,20 @@
 Agent
 =====
+
+[![Latest Stable Version](https://img.shields.io/packagist/v/jbsommeling/agent.svg?style=flat-square)](https://packagist.org/packages/jbsommeling/agent)
+[![Total Downloads](https://img.shields.io/packagist/dt/jbsommeling/agent.svg?style=flat-square)](https://packagist.org/packages/jbsommeling/agent/stats)
+[![Monthly Downloads](https://img.shields.io/packagist/dm/jbsommeling/agent.svg?style=flat-square)](https://packagist.org/packages/jbsommeling/agent/stats)
+[![PHP Version](https://img.shields.io/packagist/dependency-v/jbsommeling/agent/php.svg?style=flat-square)](https://packagist.org/packages/jbsommeling/agent)
+[![Laravel](https://img.shields.io/badge/Laravel-9.x%20%E2%80%93%2013.x-FF2D20.svg?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
+[![License](https://img.shields.io/packagist/l/jbsommeling/agent.svg?style=flat-square)](LICENSE.md)
+
 A PHP desktop/mobile user agent parser with support for Laravel, based on [Mobile Detect](https://github.com/serbanghita/Mobile-Detect) with desktop support and additional functionality.
 
 > [!note]
-> This is a modified version of [jenssegers/agent](https://github.com/jenssegers/agent) to support PHP 8.0 up and MobileDetect 4.x.
+> This is a modified version of [jenssegers/agent](https://github.com/jenssegers/agent) to support PHP 8.0 and up, and MobileDetect 4.x.
 
 > [!note]
-> This is a modified version of [asika32764/agent](https://github.com/asika32764/agent) to support PHP 8.0 up and MobileDetect 4.x. with a few fixes for personal projects. All kudo's to Asika32764 for the updated work. I'd recommend using his package instead if you want a barebones upgrade of the jenssegers/agent package.
+> All kudo's to Asika32764 for the updated work. I'd recommend using his package instead if you want a barebones upgrade of the jenssegers/agent package.
 
 
 > [!important]
@@ -20,7 +28,16 @@ A PHP desktop/mobile user agent parser with support for Laravel, based on [Mobil
 Installation
 ------------
 
-Requires PHP 8.2+ and, optionally, Laravel 12 or 13.
+Requires PHP 8.0+ and, optionally, Laravel 9 through 13.
+
+| Laravel | PHP |
+|---------|-----|
+| Without Laravel | 8.0 – 8.5 |
+| 9.x | 8.0 – 8.2 |
+| 10.x | 8.1 – 8.3 |
+| 11.x | 8.2 – 8.4 |
+| 12.x | 8.2 – 8.5 |
+| 13.x | 8.3 – 8.5 |
 
 Install using composer:
 

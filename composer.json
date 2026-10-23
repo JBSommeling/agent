@@ -1,9 +1,18 @@
 {
     "name": "jbsommeling/agent",
     "description": "Desktop/mobile user agent parser with support for Laravel, based on Mobiledetect",
-    "keywords": ["laravel", "useragent", "agent", "user agent", "browser", "platform", "mobile", "desktop"],
+    "keywords": [
+        "laravel",
+        "useragent",
+        "agent",
+        "user agent",
+        "browser",
+        "platform",
+        "mobile",
+        "desktop"
+    ],
     "homepage": "https://github.com/JBSommeling",
-    "license" : "MIT",
+    "license": "MIT",
     "authors": [
         {
             "name": "Jens Segers",
@@ -14,13 +23,13 @@
             "homepage": "https://github.com/asika32764"
         },
         {
-          "name": "Jesse Sommeling",
-          "homepage": "https://sommeling.dev"
+            "name": "Jesse Sommeling",
+            "homepage": "https://sommeling.dev"
         }
     ],
     "require": {
-        "php": ">=8.0",
-        "mobiledetect/mobiledetectlib": "^4.0",
+        "php": "^8.2",
+        "mobiledetect/mobiledetectlib": "^4.8",
         "jaybizzle/crawler-detect": "^1.2"
     },
     "require-dev": {
@@ -47,10 +56,5 @@
     },
     "suggest": {
         "illuminate/support": "Required for laravel service providers"
-    },
-    "config": {
-        "platform": {
-            "php": "8.0.5"
-        }
     }
 }

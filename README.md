@@ -20,6 +20,8 @@ A PHP desktop/mobile user agent parser with support for Laravel, based on [Mobil
 Installation
 ------------
 
+Requires PHP 8.2+ and, optionally, Laravel 12 or 13.
+
 Install using composer:
 
 ```bash

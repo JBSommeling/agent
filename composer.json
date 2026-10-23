@@ -28,8 +28,8 @@
         }
     ],
     "require": {
-        "php": "^8.2",
-        "mobiledetect/mobiledetectlib": "^4.8",
+        "php": "^8.0",
+        "mobiledetect/mobiledetectlib": "^4.9",
         "jaybizzle/crawler-detect": "^1.2"
     },
     "require-dev": {
